@@ -18,7 +18,8 @@ contains
   pure function f_c_string(fstr) result(cstr)
 
     character(len=*, kind=C_CHAR), intent(in) :: fstr
-    character(len=len_f_c_string(fstr), kind=C_CHAR) :: cstr
+    !character(len=len_f_c_string(fstr), kind=C_CHAR) :: cstr
+    character(len=len_trim(fstr) + LEN_C_NULL_CHAR, kind=C_CHAR) :: cstr
 
     cstr = trim(fstr)//C_NULL_CHAR
 

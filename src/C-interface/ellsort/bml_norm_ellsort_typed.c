@@ -136,23 +136,25 @@ double TYPED_FUNC(
     REAL_T alpha_ = (REAL_T) alpha;
     REAL_T beta_ = (REAL_T) beta;
 
-    REAL_T y[A_N];
-    int ix[A_N], jjb[A_N];
-
     int myRank = bml_getMyRank();
 
-    memset(y, 0.0, A_N * sizeof(REAL_T));
-    memset(ix, 0, A_N * sizeof(int));
-    memset(jjb, 0, A_N * sizeof(int));
-
-#pragma omp parallel for \
+#pragma omp parallel \
     default(none) \
-    firstprivate(ix, jjb, y) \
     shared(alpha_, beta_) \
     shared(A_N, A_M, A_index, A_nnz, A_value) \
     shared(A_localRowMin, A_localRowMax, myRank) \
     shared(B_N, B_M, B_index, B_nnz, B_value) \
     reduction(+:sum)
+    {
+
+      REAL_T y[A_N];
+      int ix[A_N], jjb[A_N];
+
+      memset(y, 0.0, A_N * sizeof(REAL_T));
+      memset(ix, 0, A_N * sizeof(int));
+      memset(jjb, 0, A_N * sizeof(int));
+
+#pragma omp for
     //for (int i = 0; i < A_N; i++)
     for (int i = A_localRowMin[myRank]; i < A_localRowMax[myRank]; i++)
     {
@@ -192,6 +194,7 @@ double TYPED_FUNC(
             y[jjb[jp]] = 0.0;
             jjb[jp] = 0;
         }
+    }
     }
 
     return (double) REAL_PART(sum);
